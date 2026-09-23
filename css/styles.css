@@ -207,6 +207,39 @@ h1 { margin: 18px 0 0 0; font-size: 62px; font-weight: 900; line-height: 1.02; l
 .ulink:hover { border-color: var(--link); color: #16497F; }
 
 /* ---------- responsive ---------- */
+/* ---------- data complementaria del Excel maestro ---------- */
+.srclink { font-family: var(--font-mono); font-size: 10.5px; color: var(--link); text-decoration: none; white-space: nowrap; }
+.srclink:hover { text-decoration: underline; }
+.plist { display: flex; flex-direction: column; gap: 10px; }
+.pitem { padding: 10px 12px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; }
+.pitem-n { font-size: 13px; font-weight: 600; color: var(--ink-strong); }
+.pitem-c { margin-top: 3px; font-size: 11.5px; color: var(--label); }
+.pitem-m { margin-top: 5px; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink); word-break: break-word; }
+.pitem-t { margin-top: 6px; font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+.dtip { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-2); }
+.dtip-h { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.16em; color: var(--verde); text-transform: uppercase; }
+.dreg summary { cursor: pointer; margin: 0; }
+.dreg[open] summary { margin-bottom: 12px; }
+.regrow { padding: 8px 0; border-bottom: 1px solid var(--track); }
+.regrow:last-child { border-bottom: none; }
+.regk { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--label); text-transform: uppercase; }
+.regv { margin-top: 3px; font-size: 12.5px; color: var(--ink); word-break: break-word; }
+.regc { color: var(--muted); font-size: 11.5px; }
+.xsec { margin-top: 56px; }
+.xsec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.xsec-t { margin: 0; font-size: 20px; font-weight: 700; color: var(--ink-strong); }
+.xsec-s { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.xgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+.xcard, .xbox { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+.xbox { margin-top: 18px; }
+.xcard-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.xsig { font-family: var(--font-disp); font-weight: 700; font-size: 14px; color: var(--celeste-ink); }
+.xafil { font-family: var(--font-mono); font-size: 11px; color: var(--label); }
+.clist { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+.crow { display: flex; gap: 12px; align-items: baseline; padding: 10px 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; flex-wrap: wrap; }
+.crow-n { font-size: 12.5px; color: var(--muted); word-break: break-word; }
+.xlist { margin: 0 0 16px; padding-left: 18px; font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
 @media (max-width: 1080px) {
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kpigrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -220,3 +253,6 @@ h1 { margin: 18px 0 0 0; font-size: 62px; font-weight: 900; line-height: 1.02; l
   .h1-sub { font-size: 18px; }
   .count { display: none; }
 }
+
+@media (max-width: 1080px) { .xgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 680px) { .xgrid { grid-template-columns: 1fr; } }

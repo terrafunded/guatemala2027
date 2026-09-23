@@ -19,8 +19,14 @@ index.html          Estructura de la página (shell estático)
 css/styles.css      Todo el estilo. Tokens del tema en :root al inicio
 js/data.js          La base de datos de los 28 partidos (var DATA)
 js/app.js           Lógica: filtros, orden, búsqueda, KPIs, dossier
+js/extra.js         Resto del Excel maestro (var EXTRA), generado por el script
 data/partidos.json  Copia limpia de la data en JSON puro, para pipelines
+data/extra.json     Misma data de js/extra.js en JSON puro
+data/MAESTRO_Partidos_GT_2027.xlsx  Excel maestro completo (descargable desde la página)
+scripts/build_extra.py  Regenera js/extra.js y data/extra.json desde el Excel
 ```
+
+Para actualizar la data complementaria: reemplazá el Excel en `data/` y corré `python3 scripts/build_extra.py` (requiere `pip install openpyxl`).
 
 ## Funcionalidad
 
@@ -30,6 +36,8 @@ data/partidos.json  Copia limpia de la data en JSON puro, para pipelines
 - Filtros por score A/B/C y por presidenciable anunciado
 - Orden por llamada sugerida, afiliados, fuerza territorial o alfabético
 - Dossier deslizante por partido: decisor con nivel de confianza, teléfono, correo, mejor canal, sede, pitch sugerido, músculo territorial, sanciones TSE, redes y notas de campo
+- En el dossier, además: equipo/CEN/encargados con contacto, otros contactos útiles, candidatos, tip de venta, marca y timing, datos de músculo, fuentes y el registro detallado del enriquecimiento
+- Secciones al pie: partidos en formación (18), cancelados (11), tips generales, limitaciones y las fuentes auditables, más descarga del Excel
 - Botón OCULTAR CONTACTOS: enmascara teléfonos y correos, útil al compartir pantalla
 
 ## Cómo actualizar la data

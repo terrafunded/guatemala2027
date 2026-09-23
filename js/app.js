@@ -1,5 +1,5 @@
 /* War Room Partidos GT 2027 · lógica de la app (vanilla JS, sin dependencias)
-   La data vive en js/data.js (const DATA). */
+   La data vive en js/data.js (DATA) y js/extra.js (EXTRA, resto del Excel maestro). */
 
 (function () {
   'use strict';
@@ -12,6 +12,8 @@
   var MAXA = Math.max.apply(null, DATA.map(function (p) { return p.afiliados || 0; }));
   var MAXD = Math.max.apply(null, DATA.map(function (p) { return p.dip || 0; }));
   var MAXL = Math.max.apply(null, DATA.map(function (p) { return p.alc || 0; }));
+  var EX = (typeof EXTRA !== 'undefined') ? EXTRA
+    : { partidos: {}, formacion: [], cancelados: [], fuentes: [], limitaciones: [], tipsGeneral: [] };
   var TOTA = DATA.reduce(function (a, p) { return a + (p.afiliados || 0); }, 0);
 
   // ---------- estado ----------
@@ -26,6 +28,29 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
+  function ex(sig) {
+    return EX.partidos[sig] || { equipo: [], candidatos: [], registro: [], tips: [], ficha: {}, fuentes: [] };
+  }
+  function mTel(v) { return v ? (state.priv ? '•••• ••••' : v) : ''; }
+  function mMail(v) { return v ? (state.priv ? '•••••@•••••' : v) : ''; }
+  function isUrl(u) { return typeof u === 'string' && /^https?:\/\//.test(u); }
+  function srcLink(u, label) {
+    return isUrl(u) ? ' <a class="srclink" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(label || 'fuente') + ' ↗</a>' : '';
+  }
+  function kv(k, v) {
+    return v ? '<div class="dkv"><span class="k">' + esc(k) + ': </span>' + esc(v) + '</div>' : '';
+  }
+  function kvLink(k, u) {
+    return isUrl(u) ? '<div class="dkv"><span class="k">' + esc(k) + ': </span>' + srcLink(u, 'abrir') + '</div>' : '';
+  }
+  function secret(campo) { return /tel|correo|whatsapp|mail/i.test(campo || ''); }
+  function searchText(p) {
+    var e = ex(p.sig);
+    return (p.sig + ' ' + p.nombre + ' ' + (p.pres || '') + ' ' + (p.decisor || '') + ' ' +
+      e.equipo.map(function (x) { return x.n; }).join(' ') + ' ' +
+      e.candidatos.map(function (x) { return x.n; }).join(' ')).toLowerCase();
+  }
+
   function byId(sig) {
     for (var i = 0; i < DATA.length; i++) { if (DATA[i].sig === sig) { return DATA[i]; } }
     return null;
@@ -38,8 +63,7 @@
       if (state.score !== 'todos' && p.score !== state.score) { return false; }
       if (state.pres && !p.presAnunciado) { return false; }
       if (q) {
-        var hay = (p.sig + ' ' + p.nombre + ' ' + (p.pres || '') + ' ' + (p.decisor || '')).toLowerCase();
-        if (hay.indexOf(q) === -1) { return false; }
+        if (searchText(p).indexOf(q) === -1) { return false; }
       }
       return true;
     }).slice();
@@ -149,6 +173,8 @@
       { l: 'Deptos con organización', v: p.deptos, max: 22 }
     ];
     var redes = [p.web, p.fb, p.ig, p.x, p.tiktok].filter(Boolean);
+    var e = ex(p.sig);
+    var f = e.ficha || {};
     return '' +
       '<div class="dhead" style="--pc:' + p.accent + '">' +
       '<div class="dhead-top"><span class="dhead-tag">LLAMADA #' + (p.orden || '·') + ' · SCORE ' + esc(p.score) + '</span>' +
@@ -181,12 +207,33 @@
       '<div class="dkv"><span class="k">Mejor canal: </span>' + esc(sd(p.canal)) + '</div>' +
       '<div class="dkv" style="margin-top:8px"><span class="k">Sede: </span>' + esc((p.sede || 's/d') + (p.zona ? ' · ' + p.zona : '')) + '</div>' +
       (p.horario ? '<div class="dmono" style="margin-top:6px">Horario: ' + esc(p.horario) + '</div>' : '') +
+      kv('Correo alterno', mMail(f.correoAlt)) +
+      kv('Teléfonos TSE', mTel(f.telTSE)) +
+      kv('Correos TSE', mMail(f.correoTSE)) +
+      kv('Teléfono adicional', mTel(f.telAdicional)) +
+      kv('Correo adicional', mMail(f.correoAdicional)) +
+      kv('WhatsApp / inbox', mTel(f.whatsapp)) +
+      kv('Nota WhatsApp', f.whatsappNota) +
+      kv('En sede hablar con', f.recepcion) +
+      kvLink('Mapa de la sede', f.maps) +
       '</div>' +
+
+      equipoHTML(e) +
+      otrosHTML(f) +
+      candidatosHTML(e) +
 
       '<div class="dsec pitch"><p class="dlabel verde">Pitch sugerido</p>' +
       '<div class="dpitch">' + esc(sd(p.pitch)) + '</div>' +
       (p.scoreRazon ? '<div class="drazon">Razón del score: ' + esc(p.scoreRazon) + '</div>' : '') +
+      e.tips.map(function (t) {
+        return '<div class="dtip"><div class="dtip-h">Tip de venta' + (t.prioridad ? ' · prioridad ' + esc(t.prioridad) : '') + '</div>' +
+          (t.contacto ? '<div class="dtext">Contacto: ' + esc(state.priv ? 'oculto' : t.contacto) + '</div>' : '') +
+          (t.pitch ? '<div class="dtext">' + esc(t.pitch) + '</div>' : '') +
+          (t.nota ? '<div class="dmono">' + esc(t.nota) + '</div>' : '') + '</div>';
+      }).join('') +
       '</div>' +
+
+      marcaHTML(f) +
 
       '<div class="dsec"><p class="dlabel">Músculo territorial</p>' +
       '<div class="dmrow"><span class="dmono" style="margin-top:0;font-size:12px">' + fmt(p.afiliados) + ' afiliados</span>' +
@@ -202,6 +249,11 @@
       '<div class="dtext" style="margin-top:16px">' + esc(p.promo2023 ? 'Historial de compra de material 2023: ' + p.promo2023 : 'Historial de material 2023 sin evidencia') + '</div>' +
       '<div class="driskrow"><span class="dot" style="background:' + rc + '"></span>Riesgo de cobro: ' + esc(p.riesgo || 's/d') + '</div>' +
       '<div class="dsancion">' + esc(p.sancion === 'desconocido' ? 'Sanciones TSE: sin dato verificado' : (p.sancion ? 'Sanciones TSE: ' + p.sancion : '')) + '</div>' +
+      kv('Cumple mínimo 28,083 afiliados', f.cumpleMinimo) +
+      kv('Presencia territorial', f.presencia) +
+      kv('Evidencia de promo 2023', f.evidenciaPromo) +
+      kv('Detalle de sanción', f.detalleSancion) +
+      kv('Notas de músculo', f.notasMusculo) +
       '</div>' +
 
       '<div class="dsec"><p class="dlabel">Redes y sitio</p>' +
@@ -212,8 +264,120 @@
         : '<div class="dmono" style="margin-top:0;font-size:11.5px">Sin redes verificadas en fuentes consultadas.</div>') +
       '</div>' +
 
-      '<div class="dsec last"><p class="dlabel">Notas de campo</p>' +
-      '<div class="dtext" style="margin-top:0">' + esc(sd(p.notas)) + '</div></div>';
+      '<div class="dsec"><p class="dlabel">Notas de campo</p>' +
+      '<div class="dtext" style="margin-top:0">' + esc(sd(p.notas)) + '</div>' +
+      kv('Notas de finanzas', f.notasFinanzas) + '</div>' +
+
+      fuentesHTML(e) +
+      registroHTML(e);
+  }
+
+  function equipoHTML(e) {
+    if (!e.equipo.length) { return ''; }
+    return '<div class="dsec"><p class="dlabel">Equipo, CEN y encargados (' + e.equipo.length + ')</p>' +
+      '<div class="plist">' + e.equipo.map(function (x) {
+        var contacto = [mTel(x.tel), mMail(x.correo)].filter(Boolean).join(' · ');
+        return '<div class="pitem"><div class="pitem-n">' + esc(x.n) + '</div>' +
+          '<div class="pitem-c">' + esc(sd(x.cargo)) + (x.fecha ? ' · ' + esc(x.fecha) : '') + srcLink(x.url) + '</div>' +
+          (contacto ? '<div class="pitem-m">' + esc(contacto) + '</div>' : '') +
+          (isUrl(x.linkedin) ? '<div class="pitem-m">' + srcLink(x.linkedin, 'LinkedIn') + '</div>' : '') +
+          (x.redes ? '<div class="pitem-m">' + esc(x.redes) + '</div>' : '') +
+          (x.notas ? '<div class="pitem-t">' + esc(x.notas) + '</div>' : '') +
+          '</div>';
+      }).join('') + '</div></div>';
+  }
+
+  function otrosHTML(f) {
+    var body = kv('Decisor de comunicación', f.decisorComs) +
+      kv('Jefe de campaña nacional', f.jefeCampana) +
+      kv('Secretaría de organización', f.secOrganizacion) +
+      kv('Secretaría de actas', f.secActas) +
+      kv('Otros roles CEN', f.otrosRolesCEN) +
+      kv('Otros contactos útiles', f.otros) +
+      kv('Agencia / proveedor de pauta', f.agencia);
+    return body ? '<div class="dsec"><p class="dlabel">Otros contactos útiles</p>' + body + '</div>' : '';
+  }
+
+  function candidatosHTML(e) {
+    if (!e.candidatos.length) { return ''; }
+    return '<div class="dsec"><p class="dlabel">Candidatos y precandidatos (' + e.candidatos.length + ')</p>' +
+      '<div class="plist">' + e.candidatos.map(function (c) {
+        return '<div class="pitem"><div class="pitem-n">' + esc(c.n) + '</div>' +
+          '<div class="pitem-c">' + esc([c.cargo, c.distrito, c.estatus].filter(Boolean).join(' · ')) +
+          (c.fecha ? ' · ' + esc(c.fecha) : '') + srcLink(c.url) + '</div>' +
+          (c.notas ? '<div class="pitem-t">' + esc(c.notas) + '</div>' : '') + '</div>';
+      }).join('') + '</div></div>';
+  }
+
+  function marcaHTML(f) {
+    var body = kv('Nombre aprobado en asamblea', f.nombreAsamblea) +
+      kv('Cambio de nombre', f.notaNombre) +
+      kv('Estado de asamblea / proclamación', f.estadoAsamblea ? f.estadoAsamblea.replace(/_/g, ' ') : null) +
+      kv('Fecha del evento', f.fechaEvento) +
+      kv('Eslogan 2027', f.eslogan) +
+      kvLink('Logo', f.logo) +
+      kvLink('Manual de marca', f.manualMarca) +
+      kv('Notas de timing', f.notasTiming);
+    return body ? '<div class="dsec"><p class="dlabel">Marca y timing</p>' + body + '</div>' : '';
+  }
+
+  function fuentesHTML(e) {
+    if (!e.fuentes.length) { return ''; }
+    return '<div class="dsec"><p class="dlabel">Fuentes (' + e.fuentes.length + ')</p><div class="dlinks">' +
+      e.fuentes.map(function (u) {
+        return '<a class="ulink" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(u) + '</a>';
+      }).join('') + '</div></div>';
+  }
+
+  function registroHTML(e) {
+    if (!e.registro.length) { return '<div class="dsec last"></div>'; }
+    return '<div class="dsec last"><details class="dreg"><summary class="dlabel">Registro detallado del enriquecimiento (' + e.registro.length + ')</summary>' +
+      e.registro.map(function (r) {
+        var v = secret(r.campo) && state.priv ? 'oculto' : r.valor;
+        return '<div class="regrow"><div class="regk">' + esc((r.campo || '').replace(/_/g, ' ')) + '</div>' +
+          '<div class="regv">' + esc(sd(v)) + (r.cargo ? ' <span class="regc">(' + esc(r.cargo) + ')</span>' : '') +
+          (r.fecha ? ' <span class="regc">' + esc(r.fecha) + '</span>' : '') + srcLink(r.url) + '</div>' +
+          (r.notas ? '<div class="pitem-t">' + esc(r.notas) + '</div>' : '') + '</div>';
+      }).join('') + '</details></div>';
+  }
+
+  // ---------- secciones del resto del Excel ----------
+  function renderExtras() {
+    var q = state.q.toLowerCase();
+    var form = EX.formacion.filter(function (x) {
+      return !q || (x.sig + ' ' + x.nombre + ' ' + (x.decisor || '')).toLowerCase().indexOf(q) !== -1;
+    });
+    $('#formCount').textContent = form.length + ' DE ' + EX.formacion.length;
+    $('#formGrid').innerHTML = form.map(function (x) {
+      var tels = [mTel(x.tel), mTel(x.telAlt)].filter(Boolean).join(' / ');
+      return '<div class="xcard"><div class="xcard-h"><span class="xsig">' + esc(x.sig) + '</span>' +
+        '<span class="xafil">' + fmt(x.afiliados) + ' afiliados</span></div>' +
+        '<div class="pname">' + esc(x.nombre) + '</div>' +
+        '<div class="pitem-n" style="margin-top:10px">' + esc(sd(x.decisor)) + '</div>' +
+        '<div class="pitem-c">' + esc(sd(x.cargo)) + srcLink(x.url) + '</div>' +
+        (tels ? '<div class="pitem-m">' + esc(tels) + '</div>' : '') +
+        (x.correo ? '<div class="pitem-m">' + esc(mMail(x.correo)) + '</div>' : '') +
+        kv('Sede', x.sede) + kv('Mejor canal', x.canal) +
+        (x.notas ? '<div class="pitem-t">' + esc(x.notas) + '</div>' : '') + '</div>';
+    }).join('');
+
+    $('#cancGrid').innerHTML = EX.cancelados.map(function (x) {
+      var extra = [x.sg, mTel(x.tel), mMail(x.correo), x.sede].filter(Boolean).join(' · ');
+      return '<div class="crow"><span class="xsig">' + esc(x.sig) + '</span>' +
+        '<span class="crow-n">' + esc(x.nombre) + (extra ? ' · ' + esc(extra) : '') + '</span></div>';
+    }).join('');
+
+    $('#tipsGeneral').innerHTML = EX.tipsGeneral.map(function (t) {
+      return '<div class="dtext">' + esc(t.pitch) + '</div>' + (t.nota ? '<div class="dmono">' + esc(t.nota) + '</div>' : '');
+    }).join('');
+
+    $('#limitaciones').innerHTML = EX.limitaciones.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+    $('#fuentesCount').textContent = EX.fuentes.length;
+    $('#fuentesList').innerHTML = EX.fuentes.map(function (x) {
+      return '<div class="regrow"><div class="regk">' + esc([x.fase, x.tipo, x.fecha].filter(Boolean).join(' · ')) + '</div>' +
+        '<div class="regv">' + srcLink(x.url, x.url) + '</div>' +
+        (x.nota ? '<div class="pitem-t">' + esc(x.nota) + '</div>' : '') + '</div>';
+    }).join('');
   }
 
   function openDrawer(sig) {
@@ -241,6 +405,7 @@
     $('#buscador').addEventListener('input', function (e) {
       state.q = e.target.value;
       renderGrid();
+      renderExtras();
     });
     $('#scoreChips').addEventListener('click', function (e) {
       var btn = e.target.closest('.chipbtn');
@@ -260,6 +425,7 @@
       state.priv = !state.priv;
       this.setAttribute('aria-pressed', String(state.priv));
       if (state.selSig) { openDrawer(state.selSig); }
+      renderExtras();
     });
     $('#orden').addEventListener('change', function (e) {
       state.sort = e.target.value;
@@ -279,5 +445,6 @@
   renderKPIs();
   renderStrip();
   renderGrid();
+  renderExtras();
   bind();
 })();
