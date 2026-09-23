@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>War Room Partidos GT 2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="flagband" aria-hidden="true">
+  <div class="fb-celeste"></div>
+  <div class="fb-blanco"></div>
+  <div class="fb-celeste"></div>
+</div>
+
+<header class="wrap hero">
+  <div class="eyebrow mono hero-anim">
+    <span class="livedot"></span>
+    <span>Inteligencia comercial · Elecciones generales Guatemala 2027</span>
+  </div>
+  <h1 class="disp hero-anim2">WAR ROOM<span class="accent-dot">.</span><br>
+    <span class="h1-sub">PARTIDOS POLÍTICOS GT·27</span>
+  </h1>
+  <p class="lede hero-anim3">Los 28 partidos vigentes ante el TSE, con su músculo real, su presidenciable y la puerta de entrada comercial de cada uno. Corte: 22 sep 2026 · Fuente: TSE (LPP 28 ago 2026) más enriquecimiento propio.</p>
+</header>
+
+<section class="wrap hero-anim3">
+  <div id="kpis" class="kpigrid"></div>
+</section>
+
+<section class="wrap hero-anim3 stripsec">
+  <div class="striphead mono">
+    <span>Padrón por partido · ancho proporcional a afiliados</span>
+    <span id="stripTotal"></span>
+  </div>
+  <div id="strip" class="strip"></div>
+</section>
+
+<div class="stick">
+  <div class="wrap controls">
+    <div class="searchwrap">
+      <label class="srlabel" for="buscador">Buscar partido, candidato o decisor</label>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="searchicon"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <input id="buscador" class="searchbox" type="text" placeholder="Buscar partido, candidato o decisor…">
+    </div>
+    <div class="chiprow" id="scoreChips">
+      <button class="chipbtn" data-score="todos" aria-pressed="true">TODOS</button>
+      <button class="chipbtn" data-score="A" aria-pressed="false">SCORE A</button>
+      <button class="chipbtn" data-score="B" aria-pressed="false">SCORE B</button>
+      <button class="chipbtn" data-score="C" aria-pressed="false">SCORE C</button>
+    </div>
+    <button class="chipbtn" id="presToggle" aria-pressed="false">CON PRESIDENCIABLE</button>
+    <button class="chipbtn" id="privToggle" aria-pressed="false">OCULTAR CONTACTOS</button>
+    <label class="srlabel" for="orden">Ordenar por</label>
+    <select id="orden" class="sortsel">
+      <option value="orden">ORDEN DE LLAMADA</option>
+      <option value="afiliados">AFILIADOS</option>
+      <option value="rank">FUERZA TERRITORIAL</option>
+      <option value="az">A → Z</option>
+    </select>
+    <span class="mono count" id="count"></span>
+  </div>
+</div>
+
+<main class="wrap">
+  <div id="grid" class="grid"></div>
+  <div id="empty" class="empty" hidden>
+    <div class="disp empty-t">Sin resultados</div>
+    <div class="empty-s">Ajustá los filtros o la búsqueda.</div>
+  </div>
+</main>
+
+<footer class="wrap mono foot">
+  USO INTERNO · Diputados y alcaldes = electos 2023, no bancadas actuales · Scores y decisores según enriquecimiento del 22 sep 2026 · Fuente base: https://tse.org.gt/images/descargas/LPP28082026.pdf
+</footer>
+
+<button class="scrim" id="scrim" aria-label="Cerrar dossier" tabindex="-1"></button>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Dossier del partido"></aside>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
